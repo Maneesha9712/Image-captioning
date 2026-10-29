@@ -218,3 +218,11 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+# Project-specific
+data/
+checkpoints/
+kaggle.json
+*.npy
+*.h5
+*.keras
+*.tflite
