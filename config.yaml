@@ -1,0 +1,16 @@
+seed: 42
+
+paths:
+  raw_images: data/raw/Images
+  raw_captions: data/raw/captions.txt
+  split_train: data/raw/Flickr_8k.trainImages.txt
+  split_val: data/raw/Flickr_8k.devImages.txt
+  split_test: data/raw/Flickr_8k.testImages.txt
+  processed: data/processed
+
+image_size: 224
+batch_size: 64
+
+vocab:
+  min_word_count: 5
+  max_caption_length: null   # decide from EDA
