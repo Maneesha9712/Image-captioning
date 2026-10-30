@@ -13,4 +13,4 @@ batch_size: 64
 
 vocab:
   min_word_count: 5
-  max_caption_length: null   # decide from EDA
+  max_caption_length: 22   # decide from EDA
