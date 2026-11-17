@@ -1,11 +1,4 @@
-"""tf.data input pipeline for Flickr8k captioning (M3 Section 6, extended at M4).
-
-AI-assisted: drafted with Claude Opus 5.5 (Anthropic), with TA approval.
-Every split gets identical preprocessing; only the training set is shuffled.
-M4 additions: resize_mode ("squash" or "pad"), encoder "raw" for models trained
-from scratch, and make_image_dataset (one entry per image, for generating captions).
-Run: py -m captioning.pipeline
-"""
+"""tf.data input pipeline for Flickr8k captioning (M3 Section 6, extended at M4)."""
 import json
 from pathlib import Path
 
