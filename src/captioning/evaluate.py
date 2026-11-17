@@ -81,12 +81,9 @@ def save_run(run_name, settings, scores, results_dir="results"):
            **{k: round(v, 3) if isinstance(v, float) else v for k, v in scores.items()},
            "settings": json.dumps(settings)}
     path = Path(results_dir) / "results.csv"
-    is_new = not path.exists()
-    with open(path, "a", newline="", encoding="utf-8") as f:
-        writer = csv.DictWriter(f, fieldnames=list(row))
-        if is_new:
-            writer.writeheader()
-        writer.writerow(row)
+    table = pd.read_csv(path) if path.exists() else pd.DataFrame()
+    table = pd.concat([table, pd.DataFrame([row])], ignore_index=True)
+    table.to_csv(path, index=False)
 
 
 def main():
