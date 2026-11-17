@@ -1,5 +1,6 @@
 """Simple deep baseline: small CNN trained from scratch + LSTM decoder (M4 Section 4)."""
 import numpy as np
+import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers
 
@@ -37,7 +38,7 @@ def greedy_captions(model, image_ds, id_to_word, seq_len):
         tokens[:, 0] = start_id
         done = np.zeros(n, dtype=bool)
         for t in range(seq_len - 1):
-            logits = model([images, tokens], training=False)
+            logits = model([images, tf.convert_to_tensor(tokens)], training=False)
             next_ids = np.argmax(logits[:, t, :].numpy(), axis=-1)
             next_ids[done] = 0
             tokens[:, t + 1] = next_ids
