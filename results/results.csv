@@ -1,0 +1,2 @@
+run,time,bleu1,bleu2,bleu3,bleu4,hallucination_rate,false_man,false_dog,wrong_gender,mean_length,distinct_captions,settings
+constant,2026-11-16 11:36,33.77,14.954,8.155,5.095,83.9,0.0,77.5,0.0,10.0,1,"{""model"": ""constant"", ""caption"": ""the brown and white dog is running through the grass"", ""n_candidates"": 300, ""n_images"": 500, ""seed"": 42}"
