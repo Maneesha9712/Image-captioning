@@ -1,0 +1,20 @@
+{
+  "model": "knn",
+  "features": "both",
+  "k": 10,
+  "distance": "cosine",
+  "selection": "consensus",
+  "tuned_over": {
+    "features": [
+      "hist",
+      "tiny",
+      "both"
+    ],
+    "k": [
+      1,
+      5,
+      10,
+      25
+    ]
+  }
+}
