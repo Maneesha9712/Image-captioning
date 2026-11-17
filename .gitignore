@@ -226,3 +226,4 @@ kaggle.json
 *.h5
 *.keras
 *.tflite
+logs/
