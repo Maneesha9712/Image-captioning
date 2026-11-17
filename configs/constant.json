@@ -1,0 +1,7 @@
+{
+  "model": "constant",
+  "caption": "the brown and white dog is running through the grass",
+  "n_candidates": 300,
+  "n_images": 500,
+  "seed": 42
+}
