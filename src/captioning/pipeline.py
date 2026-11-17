@@ -1,3 +1,11 @@
+"""tf.data input pipeline for Flickr8k captioning (M3 Section 6, extended at M4).
+
+AI-assisted: drafted with Claude Opus 5.5 (Anthropic), with TA approval.
+Every split gets identical preprocessing; only the training set is shuffled.
+M4 additions: resize_mode ("squash" or "pad"), encoder "raw" for models trained
+from scratch, and make_image_dataset (one entry per image, for generating captions).
+Run: py -m captioning.pipeline
+"""
 import json
 from pathlib import Path
 
@@ -10,10 +18,11 @@ from captioning.vocab import encode
 
 AUTOTUNE = tf.data.AUTOTUNE
 
-# Each pretrained encoder expects its own ImageNet preprocessing.
+# Each encoder expects its own preprocessing.
 PREPROCESS = {
     "resnet50": tf.keras.applications.resnet50.preprocess_input,
     "mobilenet_v3": lambda x: x,   # Keras MobileNetV3 rescales inside the model
+    "raw": lambda x: x,            # models trained from scratch rescale themselves
 }
 
 
@@ -36,17 +45,25 @@ def encode_split(df, vocab, max_len):
     return names, np.stack(captions)                   # (images, 5, seq_len)
 
 
-def load_image(path, image_size):
-    """Read a JPEG and squash it to image_size x image_size (kept as uint8)."""
+def load_image(path, image_size, resize_mode="squash"):
+    """Read a JPEG and make it image_size x image_size (kept as uint8).
+    squash: stretch to a square. pad: keep the shape, add black borders."""
     image = tf.io.decode_jpeg(tf.io.read_file(path), channels=3)
-    image = tf.image.resize(image, (image_size, image_size), method="bilinear")
+    if resize_mode == "pad":
+        image = tf.image.resize_with_pad(image, image_size, image_size, method="bilinear")
+    else:
+        image = tf.image.resize(image, (image_size, image_size), method="bilinear")
     return tf.cast(tf.round(image), tf.uint8)
 
 
-def make_dataset(split, cfg, encoder="resnet50", shuffle=None):
-    """Return a batched tf.data.Dataset of ((image, caption_in), caption_out)."""
+def _split_frame(cfg, split):
     df = pd.read_csv(Path(cfg["paths"]["processed"]) / "captions_split.csv")
-    df = df[df["split"] == split]
+    return df[df["split"] == split]
+
+
+def make_dataset(split, cfg, encoder="resnet50", shuffle=None, resize_mode="squash"):
+    """Return a batched tf.data.Dataset of ((image, caption_in), caption_out)."""
+    df = _split_frame(cfg, split)
     vocab = load_vocab(cfg)
     names, captions = encode_split(df, vocab, cfg["vocab"]["max_caption_length"])
     paths = [str(Path(cfg["paths"]["raw_images"]) / n) for n in names]
@@ -58,7 +75,7 @@ def make_dataset(split, cfg, encoder="resnet50", shuffle=None):
         shuffle = split == "train"
 
     ds = tf.data.Dataset.from_tensor_slices((paths, captions))
-    ds = ds.map(lambda p, c: (load_image(p, size), c), num_parallel_calls=AUTOTUNE)
+    ds = ds.map(lambda p, c: (load_image(p, size, resize_mode), c), num_parallel_calls=AUTOTUNE)
     ds = ds.cache()                                    # decode each image only once
     if shuffle:
         ds = ds.shuffle(len(paths), seed=seed, reshuffle_each_iteration=True)
@@ -76,6 +93,18 @@ def make_dataset(split, cfg, encoder="resnet50", shuffle=None):
                 num_parallel_calls=AUTOTUNE)
     ds = ds.batch(cfg["batch_size"])
     return ds.prefetch(AUTOTUNE)
+
+
+def make_image_dataset(split, cfg, encoder="resnet50", resize_mode="squash"):
+    """One entry per image (no captions), in sorted name order, for generating captions."""
+    names = sorted(_split_frame(cfg, split)["image"].unique())
+    paths = [str(Path(cfg["paths"]["raw_images"]) / n) for n in names]
+    size = cfg["image_size"]
+    preprocess = PREPROCESS[encoder]
+    ds = tf.data.Dataset.from_tensor_slices(paths)
+    ds = ds.map(lambda p: preprocess(tf.cast(load_image(p, size, resize_mode), tf.float32)),
+                num_parallel_calls=AUTOTUNE)
+    return names, ds.batch(cfg["batch_size"]).prefetch(AUTOTUNE)
 
 
 def main():
