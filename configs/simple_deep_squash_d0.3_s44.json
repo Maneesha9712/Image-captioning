@@ -1,0 +1,17 @@
+{
+  "seed": 44,
+  "resize": "squash",
+  "dropout": 0.3,
+  "epochs": 20,
+  "lr": 0.001,
+  "patience": 3,
+  "config": "config.yaml",
+  "quick": false,
+  "run": "simple_deep_squash_d0.3_s44",
+  "model": "simple_deep (3-layer CNN + LSTM-256)",
+  "parameters": 1984037,
+  "batch_size": 64,
+  "optimizer": "Adam",
+  "loss": "sparse categorical cross-entropy, <pad> ignored",
+  "early_stopping": "val_loss, restore best weights"
+}
