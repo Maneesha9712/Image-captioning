@@ -1,0 +1,6 @@
+"Error kind (of 1,000 photos)",Nearest neighbour,Simple deep (3 seeds)
+Same sentence as its most common caption,14,770 ± 398
+"Says 'man', no human did",232,650 ± 92
+"Says 'dog', no human did",220,286 ± 425
+Gender word no human used,307,472 ± 23
+Misses the main subject,831,819 ± 84
